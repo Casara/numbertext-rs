@@ -1,0 +1,7 @@
+# Default: normalize everything to LF
+* text=auto eol=lf
+
+# Upstream data, synced verbatim byte-for-byte (see data/SOURCE.md) -
+# never let git touch line endings or apply any other text normalization
+# to these, or the provenance check in data/SOURCE.md stops holding.
+data/*.sor -text

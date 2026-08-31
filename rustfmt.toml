@@ -1,0 +1,19 @@
+# Almost entirely rustfmt's defaults, on purpose: they are what every
+# Rust reader already expects, and a house style costs more in
+# unfamiliarity than it buys in preference.
+#
+# Only settings that actually differ from the default are listed. A
+# setting written out at its default value looks like a deliberate choice
+# while changing nothing, and quietly becomes one the day rustfmt changes
+# that default.
+edition = "2024"
+
+# rustfmt's default is "Auto", which infers the line ending from the file
+# it is formatting. This repository already decided that question in
+# .gitattributes (`* text=auto eol=lf`), so state it here too rather than
+# leaving the formatter to guess per file.
+newline_style = "Unix"
+
+# `Foo { x }` rather than `Foo { x: x }`. The code is written this way
+# already; this keeps it that way without relying on review to notice.
+use_field_init_shorthand = true

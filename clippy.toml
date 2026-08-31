@@ -1,0 +1,39 @@
+# See https://doc.rust-lang.org/clippy/lint_configuration.html
+#
+# Only settings that change clippy's behavior for this project are here.
+# Clippy errors on an unknown key, so every line below is verified to be
+# a real option by the fact that `cargo clippy` runs at all.
+
+# Prose in doc comments names the upstream project, the Soros language,
+# and the two spreadsheet functions the locale files emulate. These are
+# names, not code, and doc_markdown would otherwise demand backticks on
+# every occurrence. ".." keeps clippy's own default list as well, rather
+# than replacing it.
+doc-valid-idents = ["Numbertext", "NUMBERTEXT", "MONEYTEXT", "Soros", "ReDoS", "RE2", "PCRE", "UTF-8", ".."]
+
+# Struct literals initialize fields in declaration order. Cheap to honor,
+# and it keeps a diff that adds a field from reordering the others.
+check-inconsistent-struct-field-initializers = true
+
+# `explicit_iter_loop` also fires where a reborrow is what is needed, so
+# `for x in &mut v` is preferred over `v.iter_mut()` consistently.
+enforce-iter-loop-reborrow = true
+
+# Report commented-out code. This project leans hard on comments carrying
+# design rationale (see docs/coding-style.md), which is exactly the
+# environment where a commented-out expression hides in plain sight.
+lint-commented-code = true
+
+# Repeated trait bounds get collapsed into one. Barely applicable in a
+# crate with almost no generics, and free to keep honest if that changes.
+max-trait-bounds = 1
+
+# `RE2Matcher` over `Re2Matcher`, consistently, for the acronyms this
+# domain is full of.
+upper-case-acronyms-aggressive = true
+
+# `clippy::incompatible_msrv` normally skips test code. Extending it there
+# means an API newer than `rust-version` gets caught by lint on stable,
+# rather than only by the MSRV leg of the CI matrix - same failure, found
+# in seconds instead of after a full test run on an older toolchain.
+check-incompatible-msrv-in-tests = true

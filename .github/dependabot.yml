@@ -1,0 +1,23 @@
+version: 2
+
+updates:
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      # Matches the Conventional Commits convention CONTRIBUTING.md
+      # mandates on main, so Dependabot's PRs don't have to be reworded
+      # before merging.
+      prefix: "chore(deps)"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: "chore(ci)"

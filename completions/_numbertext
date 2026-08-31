@@ -1,0 +1,35 @@
+#compdef numbertext
+#
+# zsh completion for numbertext.
+#
+# Install by copying this file, under this exact name, into a directory
+# on your $fpath - `~/.zfunc` is a common choice:
+#
+#   mkdir -p ~/.zfunc && cp completions/_numbertext ~/.zfunc/
+#   echo 'fpath=(~/.zfunc $fpath)' >> ~/.zshrc
+#
+# Language codes come from `--list` on the binary being completed, so the
+# suggestions match what that build actually embedded.
+
+_numbertext_languages() {
+    local -a languages
+    languages=(${(f)"$(_call_program numbertext numbertext --list 2>/dev/null)"})
+    _describe -t languages 'language' languages
+}
+
+_numbertext() {
+    _arguments -s -S \
+        '--lang[language code, default "en"]:language:_numbertext_languages' \
+        '--list[list available language codes]' \
+        '--cardinal[spell out a cardinal number]:number:' \
+        '--ordinal[spell out an ordinal number]:number:' \
+        '--ordinal-number[format an abbreviated ordinal]:number:' \
+        '--year[spell out a calendar year]:year:' \
+        '--currency[spell out a currency amount]:ISO 4217 code: :amount:' \
+        '--money[MONEYTEXT-style currency amount]:ISO 4217 code: :amount:' \
+        '--convert[call a locale-specific section]:section: :argument:' \
+        '--help-section[print the locale'\''s own usage summary]' \
+        '--help[print usage]'
+}
+
+_numbertext "$@"

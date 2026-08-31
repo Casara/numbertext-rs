@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+# Read-only by default: nothing here writes to the repository, and a job
+# that later needs more should ask for it explicitly rather than inherit it.
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the previous run. Not applied to
+# main, where every commit's result is worth keeping.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: test (Rust ${{ matrix.rust }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 1.85 is the floor declared in Cargo.toml's `rust-version`.
+        # Running the tests on exactly that toolchain is what keeps the
+        # declaration honest - a floor is invisible when CI only ever
+        # uses the newest release, and it silently rises the first time
+        # anyone writes something newer. "stable" catches the opposite
+        # failure: breakage introduced by a new release.
+        rust:
+          - "1.85"
+          - stable
+    steps:
+      - uses: actions/checkout@v7
+
+      # A branch rather than a tag on purpose: this action's only tag is a
+      # v1 from 2022, and its branches are the documented interface -
+      # `@master` is what takes a `toolchain` input. Every other
+      # third-party action here is pinned to a release.
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.rust }}
+
+      # Proves this leg is running the toolchain it claims to. A
+      # `rust-toolchain.toml` with a `channel` would outrank the
+      # `rustup default` that the action above performs, silently
+      # running the MSRV leg on stable and leaving the floor unverified
+      # while CI stayed green. rust-toolchain.toml is deliberately
+      # channel-less to avoid that, and this step is what keeps it that
+      # way.
+      - name: verify the active toolchain is ${{ matrix.rust }}
+        run: |
+          active="$(rustc --version)"
+          echo "$active"
+          case "${{ matrix.rust }}" in
+            stable) ;;
+            *) echo "$active" | grep -q "${{ matrix.rust }}." \
+                 || { echo "::error::expected Rust ${{ matrix.rust }}, got: $active"; exit 1; } ;;
+          esac
+
+      - run: cargo test --workspace --all-targets
+      - run: cargo test --workspace --doc
+
+      # Selective language embedding is a build-time feature, so proving
+      # it works takes builds the matrix above does not perform.
+      - run: cargo test --no-default-features --features lang-en,lang-pt --test features
+      - run: cargo test --no-default-features --test features
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Deliberately "stable", and deliberately NOT part of the test
+      # matrix above. clippy and rustfmt are dev tools whose own minimum
+      # supported version moves independently of this crate's declared
+      # floor, and new clippy releases add lints that older toolchains do
+      # not have. Running them inside the MSRV matrix would make an
+      # unrelated tool release break the "1.85" leg - and linting has no
+      # per-toolchain behavior worth matrixing anyway. It runs once, on
+      # whatever is new enough to host it.
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+      - run: make msrv
+
+      # Warnings here are broken intra-doc links and malformed examples,
+      # which the test job's doctests do not catch.
+      - run: RUSTDOCFLAGS="-D warnings" cargo doc --workspace --all-features --no-deps
+
+      # Spelling. Scoped by _typos.toml, which excludes the upstream rule
+      # files and the Portuguese docs - see the reasoning there.
+      - uses: crate-ci/typos@v1.50.0
+
+      # tests/completions.rs checks the completion scripts offer the right
+      # flags, but not that they are valid shell - a syntax error would
+      # pass that test and fail at the user's first Tab.
+      - name: shell-check the completion scripts
+        run: |
+          bash -n completions/numbertext.bash
+          zsh -n completions/_numbertext
+
+  audit:
+    name: cargo-deny
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Runs on its own rather than inside `lint` so that a newly
+      # disclosed advisory is distinguishable from a code failure - the
+      # two need different responses.
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check
+
+      # A dependency that is declared but never used is both dead weight
+      # for consumers and a false entry in the audit above.
+      - uses: bnjbvr/cargo-machete@v0.9.2
+
+  markdown:
+    name: markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      # Deliberately `make lint-md` rather than the markdownlint action:
+      # it is the same pinned version contributors run locally, so the
+      # two cannot drift, and it inherits the NOTES.md exclusion.
+      - run: make lint-md
+
+  commits:
+    name: commit convention
+    runs-on: ubuntu-latest
+    # Only meaningful on a pull request, where there is a base to compare
+    # against; a push to main has already been through this.
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # cocogitto walks the range, so a shallow clone is not enough.
+          fetch-depth: 0
+
+      # Reads cog.toml, which declares the three commit types
+      # CONTRIBUTING.md adds to the conventional set (cleanup, remove,
+      # raw). Without those declared this would reject the project's own
+      # documented convention.
+      - uses: cocogitto/cocogitto-action@v4.1.0
+        with:
+          command: check
+
+  data-provenance:
+    name: data provenance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # The claim in data/SOURCE.md - that every bundled rule file is
+      # upstream's, byte for byte, except one documented patch - is the
+      # kind that quietly stops being true. Checking it costs one API
+      # call and turns a stale document into a failing job.
+      - run: python3 scripts/check-data-provenance.py

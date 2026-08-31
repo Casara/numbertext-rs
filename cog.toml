@@ -1,0 +1,17 @@
+# Configuration for cocogitto (`cog`), which lints commit messages
+# against the convention CONTRIBUTING.md mandates on `main`.
+#
+# Deliberately not used to generate CHANGELOG.md: this project keeps a
+# hand-written Keep a Changelog file, where an entry explains a change and
+# carries its migration. A changelog generated from commit subjects is a
+# different artifact - a list of commits - and would be a downgrade here.
+
+ignore_merge_commits = true
+
+# CONTRIBUTING.md's table extends the conventional set with three types.
+# Without declaring them, `cog check` would reject the project's own
+# documented convention.
+[commit_types]
+cleanup = { changelog_title = "Cleanups" }
+remove = { changelog_title = "Removals" }
+raw = { changelog_title = "Data and configuration" }

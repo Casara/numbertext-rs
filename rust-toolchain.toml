@@ -1,0 +1,17 @@
+# Deliberately declares components and NOT a channel.
+#
+# rustup accepts a channel-less [toolchain] section, and the difference
+# matters more than it looks. A `channel = "stable"` here would override
+# whatever toolchain is otherwise selected - including the one CI's MSRV
+# matrix leg installs, because dtolnay/rust-toolchain selects a toolchain
+# with `rustup default`, and this file outranks that. The "1.85" leg
+# would silently run on stable instead, and the MSRV claim would go
+# unverified while CI stayed green. Verified, not assumed.
+#
+# So the version stays where it already is: `rust-version` in Cargo.toml
+# is the floor, `.tool-versions` is what asdf installs locally, and CI's
+# matrix picks per job. This file only guarantees that whichever
+# toolchain is active also has the components `make lint` and `make fmt`
+# need, so a fresh clone doesn't fail on a missing clippy.
+[toolchain]
+components = ["rustfmt", "clippy"]

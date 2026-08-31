@@ -1,0 +1,30 @@
+# Configuration for `typos` (see `make spell`).
+
+[files]
+extend-exclude = [
+    # The rule files are upstream data in 52 languages, synced byte for
+    # byte and never hand-edited (see data/SOURCE.md). A checker aimed at
+    # English typos has nothing useful to say about Bulgarian, Hungarian
+    # or Thai number names, and acting on anything it did say would break
+    # the provenance check.
+    "data/",
+
+    # typos corrects *English* misspellings and ships no Portuguese
+    # dictionary, so on these it reports only false positives -
+    # "comandos" as "commandos", "erro" as "error", "ser" as "set".
+    # Excluding them is honest about a real limitation rather than a
+    # solved problem: THE PORTUGUESE DOCS ARE NOT SPELL-CHECKED HERE.
+    # What does cover them is `bilingual-doc-reviewer`, which reads each
+    # pair against its twin, and the doctests both READMEs carry.
+    "*.pt-BR.md",
+
+    "Cargo.lock",
+    "target/",
+    "TEMP/",
+    "NOTES.md",
+]
+
+[default.extend-words]
+# Real vocabulary in this project that resembles an English typo.
+sor = "sor"      # the rule-file extension
+Soros = "Soros"  # the language
