@@ -1,0 +1,33 @@
+# Policy for `cargo deny check` (see `make audit`).
+
+[advisories]
+# Fail on any advisory affecting the dependency graph. The graph is one
+# direct dependency deep, so there is no reason to carry exceptions.
+yanked = "deny"
+
+[licenses]
+# Every crate in the dependency graph has to be under one of these, and
+# the list holds only licenses actually present - an allowance nothing
+# matches is a warning on every run, and a checker that warns about
+# nothing gets ignored. Adding a dependency under a new license is meant
+# to require adding it here deliberately.
+#
+# Note what is NOT in scope: the bundled data/*.sor rule files are
+# BSD-3-Clause (upstream libnumbertext - see data/SOURCE.md), but they
+# are data this crate ships, not a crate it links, so cargo-deny never
+# sees them. That obligation is documented in the README's License
+# section and carried by data/LICENSE.
+allow = [
+    "MIT",
+    "Apache-2.0",
+]
+confidence-threshold = 0.93
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

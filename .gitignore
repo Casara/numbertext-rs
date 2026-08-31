@@ -1,0 +1,37 @@
+# Cargo build output
+/target/
+**/*.rs.bk
+
+# cargo-mutants
+/mutants.out/
+/mutants.out.old/
+
+# Coverage
+*.profraw
+*.profdata
+
+# Cargo.lock IS committed. This package ships a binary as well as a
+# library, which is the case Cargo's own guidance says to commit it for,
+# and it makes CI reproducible. Dependents are unaffected either way -
+# Cargo ignores a dependency's lockfile. The cost is that a
+# semver-compatible upgrade no longer reaches CI on its own; Dependabot
+# (.github/dependabot.yml) is what covers that.
+
+# env file
+.env
+
+# Local working notes and scratch reference material, not meant to be
+# committed.
+NOTES.md
+
+# Claude Code. .claude/settings.json IS committed - it carries the
+# project's shared permission allowlist. Anything personal or
+# machine-specific belongs in settings.local.json instead, so that
+# absolute paths and one-off approvals never reach the repository.
+.claude/settings.local.json
+
+# Editor/IDE
+# .idea/
+# .vscode/
+
+.DS_Store

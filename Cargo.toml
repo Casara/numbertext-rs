@@ -1,0 +1,123 @@
+[workspace]
+members = ["crates/soros"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# The floor this crate actually promises. CI runs the test suite against
+# exactly this version as well as `stable`, so the declaration stays
+# honest instead of drifting into whatever the newest toolchain happens
+# to accept - see .github/workflows/ci.yml.
+rust-version = "1.85"
+license = "MIT"
+authors = ["Rodrigo Casara <rodrigocasara@gmail.com>"]
+repository = "https://github.com/casara/numbertext-rs"
+homepage = "https://github.com/casara/numbertext-rs"
+
+[workspace.dependencies]
+soros = { version = "0.1.0", path = "crates/soros" }
+fancy-regex = "0.19"
+
+# Lints shared by every crate in the workspace. `clippy::pedantic` and
+# `clippy::cargo` are on by default here and narrowed per-case at the
+# use site, rather than being enabled ad hoc file by file.
+[workspace.lints.rust]
+missing_docs = "warn"
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+# The crate is published from a workspace whose members share one
+# version; cargo's own multiple-crate-versions lint fires on the
+# dependency graph, not on anything this code controls.
+multiple_crate_versions = "allow"
+
+[package]
+name = "numbertext"
+description = "Spell out numbers as words - cardinals, ordinals, years, currency - in every language shipped by Numbertext.org"
+keywords = ["numbertext", "number-to-words", "spellout", "i18n", "ordinal"]
+categories = ["internationalization", "localization", "text-processing"]
+readme = "README.md"
+# The bundled rule files and their upstream license travel with the
+# crate; everything else in the repository is development scaffolding.
+include = ["src/**/*", "tests/**/*", "completions/*", "build.rs", "data/*.sor", "data/LICENSE", "data/SOURCE.md", "README.md", "README.pt-BR.md", "CHANGELOG.md", "LICENSE"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+soros = { workspace = true }
+
+[lints]
+workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# BEGIN generated language features -- run `make gen-features` after changing data/*.sor
+[features]
+# The default embeds every bundled locale. Opt out with
+# `default-features = false` plus one `lang-<code>` feature per
+# language you actually need - see "Selecting which languages get
+# embedded" in README.md.
+default = ["all-languages"]
+all-languages = []
+lang-roman = []
+lang-suzhou = []
+lang-af = []
+lang-bg = []
+lang-ca = []
+lang-cs = []
+lang-da = []
+lang-de = []
+lang-el = []
+lang-en = []
+lang-eo = []
+lang-es = []
+lang-et = []
+lang-fa = []
+lang-fi = []
+lang-fr = []
+lang-ga = []
+lang-gl = []
+lang-he = []
+lang-hr = []
+lang-hu = []
+lang-hu-hung = []
+lang-id = []
+lang-is = []
+lang-it = []
+lang-ja = []
+lang-ko = []
+lang-lb = []
+lang-lg = []
+lang-lt = []
+lang-lv = []
+lang-mr = []
+lang-ms = []
+lang-mt = []
+lang-mul = []
+lang-nl = []
+lang-no = []
+lang-pl = []
+lang-pt = []
+lang-ro = []
+lang-ru = []
+lang-sh = []
+lang-sk = []
+lang-sl = []
+lang-sq = []
+lang-sr = []
+lang-sv = []
+lang-th = []
+lang-tr = []
+lang-uk = []
+lang-vi = []
+lang-zh = []
+# END generated language features
