@@ -164,7 +164,7 @@ jobs:
       # CONTRIBUTING.md adds to the conventional set (cleanup, remove,
       # raw). Without those declared this would reject the project's own
       # documented convention.
-      - uses: cocogitto/cocogitto-action@v4.1.0
+      - uses: cocogitto/cocogitto-action@v4.2.0
         with:
           command: check
 
