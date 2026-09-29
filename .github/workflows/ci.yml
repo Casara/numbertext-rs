@@ -106,7 +106,7 @@ jobs:
 
       # Spelling. Scoped by _typos.toml, which excludes the upstream rule
       # files and the Portuguese docs - see the reasoning there.
-      - uses: crate-ci/typos@v1.50.0
+      - uses: crate-ci/typos@v1.50.3
 
       # tests/completions.rs checks the completion scripts offer the right
       # flags, but not that they are valid shell - a syntax error would
