@@ -16,7 +16,7 @@ homepage = "https://github.com/casara/numbertext-rs"
 
 [workspace.dependencies]
 soros = { version = "0.1.0", path = "crates/soros" }
-fancy-regex = "0.19"
+fancy-regex = "0.20"
 
 # Lints shared by every crate in the workspace. `clippy::pedantic` and
 # `clippy::cargo` are on by default here and narrowed per-case at the
