@@ -145,7 +145,7 @@ jobs:
 
       # A dependency that is declared but never used is both dead weight
       # for consumers and a false entry in the audit above.
-      - uses: bnjbvr/cargo-machete@v0.9.2
+      - uses: bnjbvr/cargo-machete@v0.10.1
 
   markdown:
     name: markdown lint
